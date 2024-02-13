@@ -96,7 +96,7 @@ app.patch('/jokes/:id', (req, res) => {
   const existingJoke = jokes.find((joke) => joke.id === id); // kode ini akan mencari joke yang memiliki id yang sama dengan id yang diinputkan
   const replacementJoke = {
     id: id,
-    jokeText: req.body.text || existingJoke.jokeText,
+    jokeText: req.body.text || existingJoke.jokeText, // kode ini akan mengecek apakah req.body.text memiliki nilai atau tidak, jika tidak, maka akan menggunakan jokeText yang sudah ada
     jokeType: req.body.type || existingJoke.jokeType
   };
   const searchIndex = jokes.findIndex((joke) => joke.id === id); // kode ini akan mencari index dari joke yang memiliki id yang sama dengan id yang diinputkan
@@ -108,10 +108,38 @@ app.patch('/jokes/:id', (req, res) => {
     res.status(404).json({ message: 'Joke not found' });
   }
 });
-  
 //7. DELETE Specific joke
+    // DELETE adalah method yang digunakan untuk menghapus sebuah resource.
+
+app.delete('/jokes/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const searchIndex = jokes.findIndex((joke) => joke.id === id); // kode ini akan mencari index dari joke yang memiliki id yang sama dengan id yang diinputkan
+  if(searchIndex !== -1) {
+    jokes.splice(searchIndex, 1); // kode ini akan menghapus joke yang memiliki index yang sudah ditemukan
+    res.json({ message: 'Joke deleted' });
+  }
+  else {
+    res.status(404).json({ message: 'Joke not found' });
+  }
+});
 
 //8. DELETE All jokes
+    // Pada kasus ini, kita akan membuat endpoint untuk menghapus semua joke yang ada.
+    // Kita akan menggunakan method delete() untuk menghapus semua joke yang ada dan menggunakan Master Key untuk mengakses endpoint ini.
+
+    app.delete('/allDelete', (req, res) => {
+      const masterKeyInput = req.query.masterKey;
+      if(masterKeyInput === masterKey) {
+        jokes = []; // kode ini akan menghapus semua joke yang ada
+        res.json({ message: 'All jokes deleted' });
+      }
+      else {
+        res.status(401).json({ message: 'Unauthorized' });
+      }
+    }
+  );
+
+
 
 app.listen(port, () => {
   console.log(`Successfully started server on port ${port}.`);
@@ -689,3 +717,4 @@ var jokes = [
     jokeType: "Food",
   },
 ]; // kode ini akan membuat array jokes yang berisi objek-objek joke
+ 
