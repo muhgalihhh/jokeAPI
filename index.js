@@ -29,23 +29,86 @@ app.get('/jokes/:id', (req, res) => {
 
 //3. GET a jokes by filtering on the joke type
 
-app.get('/jokes', (req, res) => {
+app.get('/filter', (req, res) => {
   const jokeType = req.query.jokeType;
-  if (jokeType) {
-    const filteredJokes = jokes.filter((joke) => joke.jokeType === jokeType);
+  const filteredJokes = jokes.filter((joke) => joke.jokeType === jokeType);
+  if(filteredJokes.length > 0) {
     res.json(filteredJokes);
   }
   else {
-    res.json(jokes);
+    res.status(404).json({ message: 'Joke type not found' });
   }
 });
 
 //4. POST a new joke
-
+app.post('/jokes', (req, res) => {
+  const newJoke = {
+    id: jokes.length + 1,
+    jokeText: req.body.text,
+    jokeType: req.body.type
+  };
+  jokes.push(newJoke); // kode ini akan menambahkan joke baru ke dalam array jokes
+  res.json(newJoke); // kode ini akan mengembalikan response berupa joke yang telah ditambahkan
+  }
+);
 //5. PUT a joke
 
-//6. PATCH a joke
+// app.put('/jokes/:id', (req, res) => {
+//   const id = parseInt(req.params.id);
+//   const foundJoke = jokes.find((joke) => joke.id === id);
+//   if (foundJoke) {
+//     foundJoke.jokeText = req.body.text;
+//     foundJoke.jokeType = req.body.type;
+//     res.json(foundJoke);
+//   } else {
+//     res.status(404).json({ message: 'Joke not found' });
+//   }
+// });
 
+
+// Atau bisa juga menggunakan kode di bawah ini
+
+app.put('/jokes/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const replacementJoke = {
+    id: id,
+    jokeText: req.body.text,
+    jokeType: req.body.type
+  };
+  const searchIndex = jokes.findIndex((joke) => joke.id === id); // kode ini akan mencari index dari joke yang memiliki id yang sama dengan id yang diinputkan
+  if(searchIndex !== -1) { // kode ini akan mengecek apakah joke yang dicari ditemukan atau tidak, kenapa -1? karena jika joke tidak ditemukan, method findIndex() akan mengembalikan nilai -1
+    jokes[searchIndex] = replacementJoke;
+    res.json(replacementJoke);
+  }
+  else {
+    res.status(404).json({ message: 'Joke not found' });
+  }
+});
+//6. PATCH a joke
+    // Patch adalah method yang digunakan untuk mengupdate sebagian data dari sebuah resource.
+    // berbeda dengan PUT yang digunakan untuk mengupdate seluruh data dari sebuah resource.
+    // contoh: kita ingin mengupdate jokeText dari joke dengan id 1, kita tidak perlu mengirimkan jokeType, cukup jokeText saja.
+    // kita hanya perlu mengirimkan satu parameter saja.
+
+
+app.patch('/jokes/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const existingJoke = jokes.find((joke) => joke.id === id); // kode ini akan mencari joke yang memiliki id yang sama dengan id yang diinputkan
+  const replacementJoke = {
+    id: id,
+    jokeText: req.body.text || existingJoke.jokeText,
+    jokeType: req.body.type || existingJoke.jokeType
+  };
+  const searchIndex = jokes.findIndex((joke) => joke.id === id); // kode ini akan mencari index dari joke yang memiliki id yang sama dengan id yang diinputkan
+  if(searchIndex !== -1){
+    jokes[searchIndex] = replacementJoke;
+    res.json(replacementJoke);
+  }
+  else {
+    res.status(404).json({ message: 'Joke not found' });
+  }
+});
+  
 //7. DELETE Specific joke
 
 //8. DELETE All jokes
@@ -625,4 +688,4 @@ var jokes = [
     jokeText: "What do you call fake spaghetti? An impasta!",
     jokeType: "Food",
   },
-];
+]; // kode ini akan membuat array jokes yang berisi objek-objek joke
